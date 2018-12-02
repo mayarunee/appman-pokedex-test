@@ -80,19 +80,132 @@ img {
   display: flex;
   flex-wrap: wrap;
   margin: 5px;
-  justify-content: center;
+  margin-left: 20px;
+  width: 100%;
 }
 .card-box {
   border: 1px solid #d5d6dc;
-    background-color: #f3f4f7;
-    box-shadow: 1px 1px #d5d6dc;
-    width: 46%;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    padding: 10px;
+  background-color: #f3f4f7;
+  box-shadow: 1px 1px #d5d6dc;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  padding: 10px;
+}
+.card-box.grid {
+  width: 45%;
+}
+.card-box.list {
+  width: 100%;
 }
 .card-box .image {
   width: 160px;
   margin-right: 10px;
+}
+.card-box .details {
+  width: 100%;
+  position: relative;
+}
+.card-box .details .name{
+  font-family: 'Gaegu';
+  font-size: 1.7em;
+}
+.card-box .add {
+  text-align: right;
+  color: #dc7777;
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0
+}
+.card-box:hover .add {
+  display: block;
+}
+.card-box .remove {
+  text-align: right;
+  color: #dc7777;
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.card-box:hover .remove {
+  display: block;
+}
+.search {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  padding: 24px 5px 0;
+  text-align: center;
+  background-color: #fff;
+  height: 48px;
+  width: 100%;
+  z-index: 1;
+}
+.ReactModalPortal .card-list {
+  margin-left: 0;
+}
+.bar {
+  width: 80%;
+  margin-bottom: 5px;
+}
+.label {
+  display: inline-block;
+  margin-right: 10px;
+  width: 20%;
+}
+.value {
+  display: inline-block;
+  width: 75%;
+}
+.light-grey {
+  color: #000;
+  background-color: #e4e4e4;
+  border-radius: 16px;
+  box-shadow: #d4d4d4;
+}
+.level {
+  color: #fff;
+  background-color: #f3701a;
+  padding: 0.01em 16px;
+  border-radius: 16px;
+}
+.nolevel {
+  height: 22px;
+}
+.level-hap {
+  background-image: url("assets/happy.png");
+  background-repeat: no-repeat;
+  height: 33px;
+}
+.happy1 {
+  width: 33px
+}
+.happy2 {
+  width: 64px
+}
+.happy3 {
+  width: 94px
+}
+.happy4 {
+  width: 125px
+}
+.happy5 {
+  width: 165px
+}
+.form-control {
+  display: block;
+  width: 94%;
+  height: calc(2.25rem + 2px);
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  font-family: 'Atma', cursive;
+  line-height: 1.5;
+  color: #000;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #e6e6e6;
+  border-radius: .25rem;
+  height: 20px;
 }

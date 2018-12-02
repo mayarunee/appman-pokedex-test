@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import CardList from './CardList/CardList'
 import './App.css'
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import Modal from 'react-modal';
 
 const COLORS = {
   Psychic: "#f8a5c2",
@@ -16,46 +16,57 @@ const COLORS = {
   Colorless: "#FFF",
   Fire: "#eb4d4b"
 }
+const customStyles = {
+  content : {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: '0',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)',
+    width: '41%',
+    paddingTop: '0'
+  }
+};
+const Card = {
+  AllList: [],
+  AddList: [],
+  ShowList: []
+}
+
 
 class App extends Component {
-  constructor(props) {
-    super(props);
+  constructor() {
+    super();
+ 
     this.state = {
-        modal: false,
-        list: [],
-        searchText: '',
-    }
-    this.toggle = this.toggle.bind(this);
+      modalIsOpen: false,
+      searchText: '',
+      selectedList: []
+    };
+ 
+    this.openModal = this.openModal.bind(this);
+    this.afterOpenModal = this.afterOpenModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
   }
-  componentWillMount() {
-    let url = "http://localhost:3030/api/cards"
-    let limit = 10
-    let name = "picha"
-    let type = "normal"
-   // let list = []
-   // console.log(`http://localhost:3030/api/cards?type=${limit}&name=${name}&type=${type}`)
+  openModal() {
+    this.setState({modalIsOpen: true, searchText: ''});
+  }
+ 
+  afterOpenModal() {
+    // references are now sync'd and can be accessed.
+    //this.subtitle.style.color = '#f00';
+    this.displayAll()
+  }
+ 
+  closeModal() {
+    this.setState({modalIsOpen: false});
+  }   
+  
 
-    fetch('http://localhost:3030/api/cards' )
-            .then(res => res.json())
-            .then(
-                (result) => {
-                  
-                  this.setState({
-                    list: result.cards
-                  })
-                },
-                (error) => {
-                    this.setState({
-                        error: "error"
-                    })
-                }
-            )
-  }
   onSearchChange(e) {
-    
-    this.setState({
-        searchText: e.target.value
-    })
+ 
+    this.displayAll(e.target.value)
   }
 
   toggle() {
@@ -64,42 +75,112 @@ class App extends Component {
     })
     
   }
-  renderList() {
-    var mapped = this.state.list.map((b,i) => {
-        return ( 
-        <div key={i} className="card-box">
-          <div className="image"><img src={b.imageUrl} /></div>
-          <div className="details">
-            <div className="name">{b.name}</div>
-            <div className="hp">{b.hp}</div>
+  displayAll(val){
+    let allList = Card.AllList
+    let row = null
+    let url = "http://localhost:3030/api/cards"
+    let limit = 20
+    let name = val || ''
+    let type = ''
+
+    fetch(url + "?limit="+limit +"&name=" + name +"&type=" + type)
+      .then(res => res.json())
+      .then(
+          (result) => {
+            if(result.cards.length > 0) {
+              this.setState({
+                list: result.cards
+              })
+              return
+            } else {
+              type = name
+              name = ''
+              fetch(url + "?limit="+limit +"&name=" + name +"&type=" + type)
+              .then(res => res.json())
+              .then(
+                  (result) => {
+                    if(result.cards.length > 0) {
+                      this.setState({
+                        list: result.cards
+                      })
+                    } 
+                  }
+              )
+              
+            }
+            
+          }
+      )
+    
+
+  }
+  displaySelected(id) {
+    let list = [...this.state.list] 
+    this.setState({
+      selectedList: [...this.state.selectedList, id],
+      list: this.arrayRemove(list, id)
+    })
+  }
+  arrayRemove(arr, value) {
+    return arr.filter(function(ele){
+        return ele != value;
+    });
+  }
+  deleteList(id) {
+    let list = [...this.state.selectedList] 
+ 
+    this.setState({
+      selectedList: this.arrayRemove(list, id)
+    })
+  }
+  renderList(list) {
+    let allList = Card.AllList
+   
+    allList.map((b,i) => {
+        return (
+           <div key={i} className="card-box">
+            <div className="image"><img src={b.imageUrl} /></div>
+            <div className="details">
+              <div className="name">{b.name}</div>
+              <div className="hp">{b.hp}</div>
+            </div>
           </div>
-        </div>)
-        })
-    return mapped
+        )
+     
+      })
+     
   }
   
   render() {
+  //  console.log('render' ,Card.ShowList)
+   // this.listHandler()
+   
     return (
       <div className="App">
         <div className="header"><h1>My Pokedex</h1></div>
-        <CardList />
-        <div className="bottomBar"><div className="plus" onClick={this.toggle}>+</div></div>
-
-        <Modal size="lg" isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
-          <ModalHeader toggle={this.toggle}>Modal title</ModalHeader>
-          <ModalBody> <div className="card-list">
-          <input
-              onChange={(e) => { this.setState({ searchText: e.target.value });  }}
-              value={this.state.searchText}
-              ref={(input) => this.searchInput = input}
-              style={{ marginLeft: 15, marginRight: 60, borderRadius: 8, position: 'relative', marginBottom: 20, }} className="form-control" name="searchText" type="text" placeholder="search"></input>
-
-            {  this.renderList()}</div>
-          </ModalBody>
-          <ModalFooter>
-         
-          </ModalFooter>
+        <div>
+        {this.state.selectedList.length > 0 && <CardList list={this.state.selectedList} removelist={(id) => this.deleteList(id)} className="grid" />}
+        </div>
+        
+        <Modal
+          isOpen={this.state.modalIsOpen}
+          onAfterOpen={this.afterOpenModal}
+          onRequestClose={this.closeModal}
+          style={customStyles}
+          contentLabel="Example Modal"
+          >
+ 
+          <div className="search">
+            <input
+                  onChange={(e) => { this.setState({ searchText: e.target.value }); this.onSearchChange(e) }}
+                  value={this.state.searchText}
+                  ref={(input) => this.searchInput = input}
+                  style={{ borderRadius: 8}} className="form-control" name="searchText" type="text" placeholder="Find pokedex"></input>
+          </div>
+        
+          {this.state.list && <CardList list={this.state.list} addlist={(id) => this.displaySelected(id)} className="list"/>}
         </Modal>
+        <div className="bottomBar"><div className="plus" onClick={this.openModal}>+</div></div>
       </div>
     )
   }
