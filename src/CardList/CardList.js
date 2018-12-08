@@ -3,34 +3,9 @@ import React, { Component } from 'react'
 class CardList extends Component {
   constructor() {
     super();
- 
-    this.state = {
-      hp: 100,
-      str: 0,
-      weal: 0
-    };
-
     
   }
-  componentDidMount() {
-    this.props.list.map((b,i) => {
-      if(b.hp <= 100 ) {
-        console.log(b.hp)
-        this.setState({
-          hp: b.hp
-        })
-      }
-    })
-  }
-    calcHp(hp) {
-      let percent = 0
-      if(parseInt(hp) <= 100 ) {
-        percent = hp
-      } else {
-        percent = 100
-      }
-      return percent + '%'
-  }
+ 
 
   calc(card) {
   let Output = {
@@ -66,52 +41,46 @@ class CardList extends Component {
   }
   render() {
     let card = null
+    card = this.calc(this.props.item)
     return (
-      <div className="card-list">
-       
-          {this.props.list.map((b,i) => {
-           card = this.calc(b)
-            return ( 
-            <div key={i} className={this.props.className +" card-box"}>
-              <div className="image"><img src={b.imageUrl} /></div>
-              <div className="details">
-                {this.props.addlist && <div className="add" onClick={() => this.props.addlist(b)}>Add</div>}
-                {this.props.removelist && <div className="remove" onClick={() => this.props.removelist(b)}>x</div>}
-                <div className="name">{b.name}</div>
+      <div  className={this.props.className +" card-box"}>
+        <div className="image"><img src={this.props.item.imageUrl} /></div>
+        <div className="details">
+        
+          {this.props.showAdd && <div className="add" onClick={this.props.addItem}>Add</div>}
+          {this.props.showRemove && <div className="remove" onClick={this.props.removeItem}>X</div>}
+          <div className="name">{this.props.item.name}</div>
 
-                <div className="bar">
-                  <div className="label">HP</div>
-                  <div className="value light-grey">
-                    <div className="level" style={{width:card.hp+"%"}}>&nbsp;</div>
-                  </div>
-                </div>
-                <div className="bar">
-                  <div className="label">STR</div>
-                  <div className="value light-grey">
-                    {card.atk !== "0" &&  <div className="level" style={{width:card.atk+"%"}}>&nbsp;</div>}
-                    {card.atk === "0" && <div className="nolevel">&nbsp;</div>}
-                  </div>
-                </div>
-                <div className="bar">
-                  <div className="label">WEAK</div>
-                  <div className="value light-grey">
-                    {card.weak !== 0 && <div className="level" style={{width:card.weak+"%"}}></div>}
-                    {card.weak === 0 && <div className="nolevel">&nbsp;</div>}
-                  </div>
-                </div>
-                <div className="bar">
-                  <div className={"happy" + card.level}>
-                    <div className="level-hap">&nbsp;</div>
-                  </div>
-                </div>
+          <div className="bar">
+            <div className="label">HP</div>
+            <div className="value light-grey">
+              <div className="level" style={{width:card.hp+"%"}}>&nbsp;</div>
+            </div>
+          </div>
+          <div className="bar">
+            <div className="label">STR</div>
+            <div className="value light-grey">
+              {card.atk !== "0" &&  <div className="level" style={{width:card.atk+"%"}}>&nbsp;</div>}
+              {card.atk === "0" && <div className="nolevel">&nbsp;</div>}
+            </div>
+          </div>
+          <div className="bar">
+            <div className="label">WEAK</div>
+            <div className="value light-grey">
+              {card.weak !== 0 && <div className="level" style={{width:card.weak+"%"}}></div>}
+              {card.weak === 0 && <div className="nolevel">&nbsp;</div>}
+            </div>
+          </div>
+          <div className="bar">
+            <div className={"happy" + card.level}>
+              <div className="level-hap">&nbsp;</div>
+            </div>
+          </div>
 
-              </div>
-            </div>)
-            })}
-         
-       
+        </div>
       </div>
-    )
+      )
+  
   }
 }
 

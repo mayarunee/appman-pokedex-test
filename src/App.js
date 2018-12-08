@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import CardList from './CardList/CardList'
 import './App.css'
-import Modal from 'react-modal';
 
 const COLORS = {
   Psychic: "#f8a5c2",
@@ -40,147 +39,119 @@ class App extends Component {
     super();
  
     this.state = {
-      modalIsOpen: false,
-      searchText: '',
-      selectedList: []
-    };
+      modalOpen: 'close',
+      allList: [],
+      selectedList: [],
+      list: []
+    }
  
-    this.openModal = this.openModal.bind(this);
-    this.afterOpenModal = this.afterOpenModal.bind(this);
-    this.closeModal = this.closeModal.bind(this);
-  }
-  openModal() {
-    this.setState({modalIsOpen: true, searchText: ''});
-  }
- 
-  afterOpenModal() {
-    // references are now sync'd and can be accessed.
-    //this.subtitle.style.color = '#f00';
-    this.displayAll()
-  }
- 
-  closeModal() {
-    this.setState({modalIsOpen: false});
-  }   
-  
-
-  onSearchChange(e) {
- 
-    this.displayAll(e.target.value)
-  }
-
-  toggle() {
-    this.setState({
-        modal: !this.state.modal
-    })
-    
-  }
-  displayAll(val){
-    let allList = Card.AllList
-    let row = null
-    let url = "http://localhost:3030/api/cards"
-    let limit = 20
-    let name = val || ''
-    let type = ''
-
-    fetch(url + "?limit="+limit +"&name=" + name +"&type=" + type)
-      .then(res => res.json())
-      .then(
-          (result) => {
-            if(result.cards.length > 0) {
-              this.setState({
-                list: result.cards
-              })
-              return
-            } else {
-              type = name
-              name = ''
-              fetch(url + "?limit="+limit +"&name=" + name +"&type=" + type)
-              .then(res => res.json())
-              .then(
-                  (result) => {
-                    if(result.cards.length > 0) {
-                      this.setState({
-                        list: result.cards
-                      })
-                    } 
-                  }
-              )
-              
-            }
-            
-          }
-      )
-    
-
-  }
-  displaySelected(id) {
-    let list = [...this.state.list] 
-    this.setState({
-      selectedList: [...this.state.selectedList, id],
-      list: this.arrayRemove(list, id)
-    })
-  }
-  arrayRemove(arr, value) {
-    return arr.filter(function(ele){
-        return ele != value;
-    });
-  }
-  deleteList(id) {
-    let list = [...this.state.selectedList] 
- 
-    this.setState({
-      selectedList: this.arrayRemove(list, id)
-    })
-  }
-  renderList(list) {
-    let allList = Card.AllList
    
-    allList.map((b,i) => {
-        return (
-           <div key={i} className="card-box">
-            <div className="image"><img src={b.imageUrl} /></div>
-            <div className="details">
-              <div className="name">{b.name}</div>
-              <div className="hp">{b.hp}</div>
-            </div>
-          </div>
-        )
-     
-      })
-     
   }
+  componentDidMount() {
+    this.fetchHandle()
+  }
+ 
+  openListHandler = () => {
+    this.setState({allList: this.state.list})
+    this.openModal()
+  }
+  openModal = () => {
+    this.setState({
+      modalOpen: (this.state.modalOpen === 'close')? 'open': 'close'
+    })
+  }
+  addItem = (itemIndex) => {
+    const arrAll = [...this.state.allList]
+    let arrSelect = [...this.state.list]
+    let arrSelected = [...this.state.selectedList]
+    
+    arrAll.map((value,i )=> {
+      if (value.id === itemIndex){
+        arrSelected.push(value)
+      }
+    })
+    arrSelect = arrSelect.filter(v => {
+      return (v.id !== itemIndex)
+    })
+
+    this.setState({selectedList: arrSelected, list: arrSelect})
+  }
+  removeItem = (itemIndex) => {
+    const arrAll = [...this.state.allList]
+    let arrSelect = [...this.state.list]
+    let arrSelected = [...this.state.selectedList]
+    
+    arrAll.map((value,i )=> {
+      if (value.id === itemIndex){
+        arrSelect.push(value)
+      }
+    })
+    arrSelected = arrSelected.filter(v => {
+      return (v.id !== itemIndex)
+    })
+  
+    this.setState({selectedList: arrSelected, list: arrSelect})
+  }
+  fetchHandle(name,type) {
+    let url = "http://localhost:3030/api/cards"
+    let _limit = '?limit=20'
+    let _name = (name)? '&name='+name : ''
+    let _type = (type)? '&type='+type : ''
+
+    fetch(`${url}${_limit}${_name}${_type}`)
+    .then((res) => res.json())
+    .then(data => { 
+      this.setState({list: data.cards})
+      })
+  }
+  onSearchChange(e) {
+    this.fetchHandle(e.target.value)
+  }
+
+ 
   
   render() {
-  //  console.log('render' ,Card.ShowList)
-   // this.listHandler()
-   
+
+    let list = null
+    let selectedList = null
+    if(this.state.list) {
+      list = (
+        this.state.list.map((v,i)=> {
+          return <CardList key={i} listIndex={i} item={v} showAdd={true} addItem={() => this.addItem(v.id)} />
+        })
+      )
+    }
+    if(this.state.selectedList) {
+      selectedList = (
+        this.state.selectedList.map((v,i)=> {
+          return <CardList key={i} listIndex={i} item={v} showRemove={true} removeItem={() => this.removeItem(v.id)} className="grid"/>
+        })
+      )
+    }
+
     return (
       <div className="App">
         <div className="header"><h1>My Pokedex</h1></div>
-        <div>
-        {this.state.selectedList.length > 0 && <CardList list={this.state.selectedList} removelist={(id) => this.deleteList(id)} className="grid" />}
+        <div className="card-list">
+        {selectedList}
         </div>
-        
-        <Modal
-          isOpen={this.state.modalIsOpen}
-          onAfterOpen={this.afterOpenModal}
-          onRequestClose={this.closeModal}
-          style={customStyles}
-          contentLabel="Example Modal"
-          >
- 
-          <div className="search">
+
+        <div className={this.state.modalOpen+" modal"} onClick={this.openModal}></div>
+        <div className={this.state.modalOpen+" modal-dialog"}>
+          <div className="modal-header">Card List <span onClick={this.openModal}>x</span></div>
+          <div className="modal-body">
+            <div className="search">
             <input
                   onChange={(e) => { this.setState({ searchText: e.target.value }); this.onSearchChange(e) }}
                   value={this.state.searchText}
                   ref={(input) => this.searchInput = input}
                   style={{ borderRadius: 8}} className="form-control" name="searchText" type="text" placeholder="Find pokedex"></input>
+            </div>
+            <div className="box">{list}</div>  
           </div>
-        
-          {this.state.list && <CardList list={this.state.list} addlist={(id) => this.displaySelected(id)} className="list"/>}
-        </Modal>
-        <div className="bottomBar"><div className="plus" onClick={this.openModal}>+</div></div>
+        </div>
+
+        <div className="bottomBar"><div className="plus" onClick={this.openListHandler}>+</div></div>
       </div>
     )
   }

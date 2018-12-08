@@ -209,3 +209,38 @@ img {
   border-radius: .25rem;
   height: 20px;
 }
+
+.modal {
+
+  background-color: #ddd;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  opacity: .5;
+}
+.modal-dialog {
+  z-index: 2;
+  background-color: #fff;
+  border: 1px solid #eeeeee;
+  width: 70%;
+  padding: 15px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  margin: 100px auto;
+  opacity: 1;
+}
+.modal.close, .modal-dialog.close {
+  display:  none;
+}
+.modal.open, .modal-dialog.open {
+  display: block;
+}
+.modal-body {
+  overflow: auto;
+  height: 459px;
+}
